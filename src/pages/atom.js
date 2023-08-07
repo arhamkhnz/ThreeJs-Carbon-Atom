@@ -69,6 +69,57 @@ const Nucleus = ({ isotope = 12 }) => {
   );
 };
 
+const SOrbital = ({ position, color, label }) => {
+  const ref = useRef();
+  const labelRef = useRef();
+  useFrame((state) => {
+    labelRef.current.position.copy(ref.current.position);
+  });
+
+  return (
+    <group>
+      <Sphere ref={ref} args={[0.8, 32, 32]} position={position}>
+        <meshStandardMaterial color={color} emissive={color} roughness={0.1} metalness={2} />
+      </Sphere>
+      <group ref={labelRef}>
+        <Html>
+          <div style={{ color: 'white', fontSize: '1em' }}>{label}</div>
+        </Html>
+      </group>
+    </group>
+  );
+};
+
+const POrbital = ({ position, orientation = 'x', color, label }) => {
+  const ref = useRef();
+  const labelRef = useRef();
+  useFrame((state) => {
+    labelRef.current.position.copy(ref.current.position);
+  });
+
+  const scale = orientation === 'y' ? [0.4, 1.2, 0.4] : orientation === 'z' ? [0.4, 0.4, 1.2] : [1.2, 0.4, 0.4];
+
+  // Define a label offset based on the orientation
+  let labelOffset = [2, 2, 2]; // Default x-offset
+  if (orientation === 'y') {
+    labelOffset = [0, 4, 0]; // y-offset
+  } else if (orientation === 'z') {
+    labelOffset = [0, 0, 4]; // z-offset
+  }
+
+  return (
+    <group>
+      <Sphere ref={ref} args={[0.8, 32, 32]} position={position} scale={scale}>
+        <meshStandardMaterial color={color} emissive={color} roughness={0.1} metalness={2} />
+      </Sphere>
+      <group ref={labelRef} position={labelOffset}>
+        <Html>
+          <div style={{ color: 'white', fontSize: '1em' }}>{label}</div>
+        </Html>
+      </group>
+    </group>
+  );
+};
 
 
 const Electron = ({ position, speed, color, plane, label }) => {
@@ -167,19 +218,30 @@ const Atom = () => {
         </span>
       </div>
 
-      <Canvas style={{ background: 'black', position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
-        <ambientLight />
-        <pointLight position={[10, 10, 10]} />
-        <Stars />
-        <Nucleus isotope={isotope} />
-        <Electron position={4} speed={1} color="#00F" plane="xz" label="Electron 1" />
-        <Electron position={4} speed={2} color="#00F" plane="xz" label="Electron 2" />
-        <Electron position={6} speed={1} color="#F00" plane="xz" label="Electron 3" />
-        <Electron position={6} speed={4} color="#F00" plane="xy2" label="Electron 4" />
-        <Electron position={6} speed={3} color="#0F0" plane="xz" label="Electron 5" />
-        <Electron position={6} speed={4} color="#0F0" plane="xy" label="Electron 6" />
-        <Controls />
-      </Canvas>
+  <Canvas style={{ background: 'black', position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
+    <ambientLight />
+    <pointLight position={[10, 10, 10]} />
+    <Stars />
+    <Nucleus isotope={isotope} />
+    
+    <SOrbital position={[0, 0, 0]} color="#00F" />
+    <Electron position={2} speed={1} color="#FF0" plane="xz" label="1s Electron 1" />
+    <Electron position={-2} speed={1} color="#FF0" plane="xy" label="1s Electron 2" />
+
+    <SOrbital position={[0, 0, 0]} color="#0FF" />
+    <Electron position={3.5} speed={1.2} color="#FFA500" plane="xz" label="2s Electron 1" />
+    <Electron position={-3.5} speed={1.2} color="#FFA500" plane="xy" label="2s Electron 2" />
+    
+    <POrbital position={[0, 0, 0]} orientation="x" color="#F00" />
+    <Electron position={5} speed={1.4} color="#0F0" plane="xz" label="2px Electron" />
+
+    <POrbital position={[0, 0, 0]} orientation="y" color="#F00" />
+    <Electron position={5} speed={1.4} color="#0F0" plane="xy" label="2py Electron" />
+
+    <Controls />
+</Canvas>
+
+
     </div>
   );
 };
