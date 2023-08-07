@@ -1,25 +1,76 @@
-import React, { useRef, useMemo } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import { Canvas, useFrame, extend, useThree } from '@react-three/fiber';
 import { Sphere, OrbitControls, Line, Html, Stars } from '@react-three/drei';
 import * as THREE from 'three';
 
 extend({ OrbitControls });
 
-// Component for the nucleus
-const Nucleus = () => {
+const Nucleus = ({ isotope = 12 }) => {
+  const sphericalToCartesian = (radius, polar, azimuthal) => {
+    const x = radius * Math.sin(polar) * Math.cos(azimuthal);
+    const y = radius * Math.sin(polar) * Math.sin(azimuthal);
+    const z = radius * Math.cos(polar);
+    return [x, y, z];
+  };
+
+  const getNucleons = () => {
+    const nucleons = [];
+    const protonColor = "#FFD700";
+    const neutronColor = "#C0C0C0";
+    const protons = 6;
+    let neutrons;
+    
+    switch (isotope) {
+      case 13:
+        neutrons = 7;
+        break;
+      case 14:
+        neutrons = 8;
+        break;
+      default:
+        neutrons = 6; // For Carbon-12
+    }
+
+    const totalNucleons = protons + neutrons;
+
+    for (let i = 0; i < totalNucleons; i++) {
+      const polar = Math.acos(1 - 2 * (i + 0.5) / totalNucleons);
+      const azimuthal = Math.sqrt(totalNucleons * Math.PI) * polar;
+      const position = sphericalToCartesian(1.25, polar, azimuthal); 
+
+      if (i < protons) {
+        nucleons.push({ color: protonColor, position });
+      } else {
+        nucleons.push({ color: neutronColor, position });
+      }
+    }
+
+    return nucleons;
+  };
+
+  const nucleons = getNucleons();
+
   return (
     <group>
-      <Sphere args={[2, 32, 32]}>
-        <meshStandardMaterial color="#FFD700" emissive="#fccb06" emissiveIntensity={0.5}  />
-      </Sphere>
-      <Html position={[0, 3, 1]}>
-        <div style={{ color: 'white', fontSize: '1em' }}>Nucleus</div>
-      </Html>
-    </group>
+      {nucleons.map((nucleon, index) => (
+        <>
+          <Sphere key={index} args={[0.8, 32, 32]} position={nucleon.position}>
+            <meshStandardMaterial color={nucleon.color} emissive={nucleon.color} emissiveIntensity={0.5} />
+          </Sphere>
+          <Sphere key={`outline-${index}`} args={[0.85, 32, 32]} position={nucleon.position} visible={true}>
+            <meshLambertMaterial color="#1A1110" wireframe={true} />
+          </Sphere>
+        </>
+      ))}
+            <Html position={[0, 4, 1]}>
+                <div style={{ color: 'white', fontSize: '1em', whiteSpace: 'nowrap' }}>Carbon-{isotope}</div>
+            </Html>
+        </group>
   );
 };
 
-// Component for electrons
+
+
 const Electron = ({ position, speed, color, plane, label }) => {
   const ref = useRef();
   const labelRef = useRef();
@@ -59,40 +110,49 @@ const Electron = ({ position, speed, color, plane, label }) => {
   );
 };
 
-// Controls component
 const Controls = () => {
-    const { camera, gl } = useThree();
-    camera.position.x = 18.5;
-    camera.position.y = 1.5;
-    camera.position.z = -0.01;
-    camera.lookAt(0, 0, 0);
-    const controls = useRef();
-    useFrame((state) => {
-      controls.current.update();
-    });
-    return <OrbitControls ref={controls} args={[camera, gl.domElement]} maxDistance={50} />;
-  };
+  const { camera, gl } = useThree();
+  camera.position.x = 18.5;
+  camera.position.y = 1.5;
+  camera.position.z = -0.01;
+  camera.lookAt(0, 0, 0);
+  const controls = useRef();
+  useFrame((state) => {
+    controls.current.update();
+  });
+  return <OrbitControls ref={controls} args={[camera, gl.domElement]} maxDistance={50} />;
+};
 
-// Main component
 const Atom = () => {
+  const [isotope, setIsotope] = useState(12); // Default to Carbon-12
+
   return (
     <div style={{ position: 'relative', height: '100vh', width: '100vw' }}>
-    <h1 style={{ color: 'white', textAlign: 'center', position: 'absolute', top: '10px', width: '100%', zIndex: 1, fontFamily: 'math'  }}>Carbon Atom</h1>
-    <Canvas style={{ background: 'black', position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
-      <ambientLight  />
-      <pointLight position={[10, 10, 10]} />
-      <Stars />
-      <Nucleus />
-      <Electron position={4} speed={1} color="#00F" plane="xz" label="Electron 1" />
-      <Electron position={4} speed={2} color="#00F" plane="xz" label="Electron 2" />
-      <Electron position={6} speed={1} color="#F00" plane="xz" label="Electron 3" />
-      <Electron position={6} speed={4} color="#F00" plane="xy2" label="Electron 4" />
-      <Electron position={6} speed={3} color="#0F0" plane="xz" label="Electron 5" />
-      <Electron position={6} speed={4} color="#0F0" plane="xy" label="Electron 6" />
-      <Controls />
-    </Canvas>
-  </div>
-  
+      <h1 style={{ color: 'white', textAlign: 'center', position: 'absolute', top: '10px', width: '100%', zIndex: 1, fontFamily: 'math' }}>Carbon Atom</h1>
+      
+      <div style={{ position: 'absolute', top: '60px', right: '10px', zIndex: 2 }}>
+        <label style={{ color: 'white', marginRight: '10px' }}>Select Isotope:</label>
+        <select value={isotope} onChange={(e) => setIsotope(parseInt(e.target.value))}>
+          <option value={12}>Carbon-12</option>
+          <option value={13}>Carbon-13</option>
+          <option value={14}>Carbon-14</option>
+        </select>
+      </div>
+
+      <Canvas style={{ background: 'black', position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
+        <ambientLight />
+        <pointLight position={[10, 10, 10]} />
+        <Stars />
+        <Nucleus isotope={isotope} />
+        <Electron position={4} speed={1} color="#00F" plane="xz" label="Electron 1" />
+        <Electron position={4} speed={2} color="#00F" plane="xz" label="Electron 2" />
+        <Electron position={6} speed={1} color="#F00" plane="xz" label="Electron 3" />
+        <Electron position={6} speed={4} color="#F00" plane="xy2" label="Electron 4" />
+        <Electron position={6} speed={3} color="#0F0" plane="xz" label="Electron 5" />
+        <Electron position={6} speed={4} color="#0F0" plane="xy" label="Electron 6" />
+        <Controls />
+      </Canvas>
+    </div>
   );
 };
 
