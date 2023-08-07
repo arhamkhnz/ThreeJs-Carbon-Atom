@@ -130,13 +130,41 @@ const Atom = () => {
     <div style={{ position: 'relative', height: '100vh', width: '100vw' }}>
       <h1 style={{ color: 'white', textAlign: 'center', position: 'absolute', top: '10px', width: '100%', zIndex: 1, fontFamily: 'math' }}>Carbon Atom</h1>
       
-      <div style={{ position: 'absolute', top: '60px', right: '10px', zIndex: 2 }}>
+      <div style={{ position: 'absolute', top: '60px', right: '10px', zIndex: 2, marginTop: '1.5rem' }}>
         <label style={{ color: 'white', marginRight: '10px' }}>Select Isotope:</label>
         <select value={isotope} onChange={(e) => setIsotope(parseInt(e.target.value))}>
           <option value={12}>Carbon-12</option>
           <option value={13}>Carbon-13</option>
           <option value={14}>Carbon-14</option>
         </select>
+      </div>
+
+      <div style={{ position: 'absolute', top: '110px', right: '10px', zIndex: 2, marginTop: '1.5rem' }}>
+        <div style={{
+            width: '20px',
+            height: '20px',
+            borderRadius: '50%',
+            backgroundColor: '#FFD700',
+            display: 'inline-block',
+            verticalAlign: 'middle',
+            marginRight: '5px'
+        }}></div>
+        <span style={{ color: 'white', marginRight: '20px' }}>
+            Protons: 6
+        </span>
+
+        <div style={{
+            width: '20px',
+            height: '20px',
+            borderRadius: '50%',
+            backgroundColor: '#C0C0C0',
+            display: 'inline-block',
+            verticalAlign: 'middle',
+            marginRight: '5px'
+        }}></div>
+        <span style={{ color: 'white' }}>
+            Neutrons: {isotope - 6}
+        </span>
       </div>
 
       <Canvas style={{ background: 'black', position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
