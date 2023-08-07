@@ -203,7 +203,7 @@ const Electron = ({ position, speed, color, plane, label }) => {
 
 const Controls = () => {
   const { camera, gl } = useThree();
-  camera.position.x = 18.5;
+  camera.position.x = 12.5;
   camera.position.y = 1.5;
   camera.position.z = -0.01;
   camera.lookAt(0, 0, 0);
@@ -354,7 +354,7 @@ const Atom = () => {
           The electron configuration of carbon is 1s<sup>2</sup> 2s<sup>2</sup>{" "}
           2p<sup>2</sup>.
         </div>
-        <div style={{ color: "white", marginTop: "0.5rem", fontStyle: "italic" }}>
+        <div style={{ color: "white", marginTop: "0.5rem", fontStyle: "italic", textAlign:'center' }}>
           Model is not to scale.
         </div>
       </div>
